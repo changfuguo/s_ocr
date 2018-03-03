@@ -2,7 +2,8 @@ const fileCache = require('think-cache-file');
 const nunjucks = require('think-view-nunjucks');
 const fileSession = require('think-session-file');
 const mysql = require('think-model-mysql');
-const {Console, File, DateFile} = require('think-logger3');
+const {File, DateFile, Console} = require('think-logger3');
+
 const path = require('path');
 const isDev = think.env === 'development';
 
@@ -28,23 +29,66 @@ exports.cache = {
  * @type {Object}
  */
 exports.model = {
-  type: 'mysql',
-  common: {
-    logConnect: isDev,
-    logSql: isDev,
-    logger: msg => think.logger.info(msg)
-  },
-  mysql: {
-    handle: mysql,
-    database: '',
-    prefix: 'think_',
-    encoding: 'utf8',
-    host: '127.0.0.1',
-    port: '',
-    user: 'root',
-    password: 'root',
-    dateStrings: true
-  }
+    type: 'mongoose',
+    common: {
+        logConnect: isDev,
+        logSql: isDev,
+        logger: msg => think.logger.info(msg)
+    },
+    mysql: {
+        handle: mysql,
+        database: '',
+        prefix: 'think_',
+        encoding: 'utf8',
+        host: '127.0.0.1',
+        port: '',
+        user: 'root',
+        password: 'root',
+        dateStrings: true
+    },
+    mongo: {
+        // handle: mongo,
+        host: '127.0.0.1',
+        port: '27000',
+        user: 'fb_ocr',
+        password: '123456',
+        prefix: 'fb_',
+        database: 'fb_ocr', //这里要配置数据库名称
+        encoding: 'utf8',
+        nums_per_page: 10,
+        log_sql: true,
+        log_connect: true,
+        cache: {
+             on: true,
+             type: '',
+             timeout: 3600
+        },
+        options: {
+             //authSource: 'admin'
+         }
+    },
+   mongoose: {
+        // handle: mongo,
+        host: '127.0.0.1',
+        port: '27000',
+        user: 'fb_ocr',
+        password: '123456',
+        prefix: 'fb_',
+        database: 'fb_ocr', //这里要配置数据库名称
+        encoding: 'utf8',
+        nums_per_page: 10,
+        log_sql: true,
+        useCollectionPlural: false,
+        log_connect: true,
+        cache: {
+             on: true,
+             type: '',
+             timeout: 3600
+        },
+        options: {
+             //authSource: 'admin'
+         }
+    }
 };
 
 /**
@@ -55,8 +99,8 @@ exports.session = {
   type: 'file',
   common: {
     cookie: {
-      name: 'thinkjs'
-      // keys: ['werwer', 'werwer'],
+      name: 'fb_ocr',
+      keys: ['fb_ocr', '123456'],
       // signed: true
     }
   },
@@ -82,28 +126,25 @@ exports.view = {
   }
 };
 
-/**
- * logger adapter config
- * @type {Object}
- */
 exports.logger = {
-  type: isDev ? 'console' : 'dateFile',
-  console: {
-    handle: Console
-  },
-  file: {
-    handle: File,
-    backups: 10, // max chunk number
-    absolute: true,
-    maxLogSize: 50 * 1024, // 50M
-    filename: path.join(think.ROOT_PATH, 'logs/app.log')
-  },
-  dateFile: {
-    handle: DateFile,
-    level: 'ALL',
-    absolute: true,
-    pattern: '-yyyy-MM-dd',
-    alwaysIncludePattern: true,
-    filename: path.join(think.ROOT_PATH, 'logs/app.log')
-  }
-};
+    type: isDev ? 'console' : 'app',
+    console: {
+        handle: Console
+    },
+    app: {
+        handle: DateFile,
+        level: 'ALL',
+        absolute: true,
+        pattern: '-yyyy-MM-dd',
+        alwaysIncludePattern: false,
+        filename: path.join(think.ROOT_PATH, 'logs/app/app.log')
+    },
+    request: {
+        handle: DateFile,
+        level: 'ALL',
+        absolute: true,
+        pattern: '-yyyy-MM-dd',
+        alwaysIncludePattern: false,
+        filename: path.join(think.ROOT_PATH, 'logs/request/request.log')
+    }
+}
